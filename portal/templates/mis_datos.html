@@ -1,0 +1,34 @@
+{% extends 'home.html' %}
+{% load static %}
+{% block title %}Mis Datos{% endblock %}
+ 
+{% block seccion %}
+
+
+
+<div class='container'>
+	<table class="table hovered" id='encabezado_liquidacion'>
+	<tr>
+		<td>NOMBRE</td> <td>{{usuario.nombre}}</td><td></td><td></td>
+		<td>RUT</td> <td>{{usuario.rut}}</td>
+	</tr>
+	<tr>
+		<td>C.COSTO</td> <td>{{usuario.CCosto}}</td><td></td><td></td>
+		<td>AREA</td> <td>{{usuario.zonal}}</td>
+	</tr>
+	<tr>
+		<td>CARGO</td> <td>{{usuario.cargo}}</td><td></td><td></td>
+		<td>FECHA ING</td> <td>{{usuario.fecha_ingreso}}</td>
+	</tr>
+	<tr>
+		<td>AFP</td> <td>{{usuario.afp}}</td><td></td><td></td>
+		<td>SALUD</td> <td>{{usuario.salud}}</td>
+	</tr>
+	
+</table>
+	
+	<a href="obtener_certificado"><h3>Obtener Certificado de antigüedad</h3></a>
+</div>
+
+
+{% endblock %}

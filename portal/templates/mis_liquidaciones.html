@@ -1,0 +1,50 @@
+{% extends 'home.html' %}
+{% load static %}
+{% block title %}Mis Liquidaciones{% endblock %}
+  
+
+{% block seccion %}
+
+
+{% if liquidaciones %}
+<div class="example" data-text="example">
+    <table id="example_table" class="dataTable striped border bordered" data-role="datatable" data-searching="true">
+        <thead>
+            <tr>
+                    <th>Periodo</th>
+                    <th>Sueldo Base</th>
+                    <th>Gratificacion</th>
+                    <th>Horas extras</th>
+                    <th>Liquido a pago</th>
+                    <th></th>            
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                    <th>Periodo</th>
+                    <th>Sueldo Base</th>
+                    <th>Gratificacion</th>
+                    <th>Horas extras</th>
+                    <th>Liquido a pago</th>
+                    <th></th> 
+            </tr>
+        </tfoot>
+        <tbody>
+        {% for liquidacion in liquidaciones %}  
+            <tr>
+                    <td>{{ liquidacion.mes }}</td>
+                    <td>${{ liquidacion.sueldo }}</td>
+                    <td>${{ liquidacion.gratificacion }}</td>
+                    <td>${{ liquidacion.h_extras }}</td>
+                    <td>${{ liquidacion.liquido_pago }}</td>
+
+                    
+                    <td><button class="button primary" value="imprimir"><a href="imprimir_liquidacion/{{ liquidacion.id }}">Descargar</a></button></td>
+            </tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
+
+{% endblock %}
