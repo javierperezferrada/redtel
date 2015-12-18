@@ -3,6 +3,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Mensaje(models.Model):
+	id=models.AutoField(primary_key=True)
+	msg = models.CharField(max_length=1024)
+
 class Usuario(models.Model):
 	id=models.AutoField(primary_key=True)
 	nombre = models.CharField(max_length=45)

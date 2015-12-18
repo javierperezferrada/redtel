@@ -3,14 +3,13 @@ from django.shortcuts import get_object_or_404, render
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.contrib.auth.decorators import login_required,permission_required
 from django.http import HttpResponse
-
-
 import os
 #Librerias reportlab a usar:
 from reportlab.platypus import (SimpleDocTemplate, PageBreak, Image, Spacer,
@@ -18,213 +17,72 @@ Paragraph, Table, TableStyle)
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-
+from reportlab.lib.units import mm, inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from io import BytesIO 
 from reportlab.pdfgen import canvas
 from .models import Usuario, Us
 from .models import Liquidacion
+from .models import Mensaje
 from django.contrib import messages
 import csv
 from .forms import UploadFileForm
+from .forms import MensajeForm
 
 
 def index(request):
     return render_to_response('index.html')
 
-#@login_required()
+@login_required()
 def home(request):
-   return render_to_response('home.html', {'user': request.user}, context_instance=RequestContext(request))
-
-
+    mensajes = Mensaje.objects.all()
+    return render_to_response("home.html", 
+        {'mensajes':mensajes},
+        context_instance=RequestContext(request)) 
+  # return render_to_response('home.html', {'user': request.user}, context_instance=RequestContext(request))
 
 @login_required()
 def mis_datos(request):
 	usuario = get_object_or_404(Usuario, rut=request.user.first_name)
 	return render_to_response('mis_datos.html', {'usuario': usuario}, context_instance=RequestContext(request))
 
-#@login_required()
-#def obtener_certificado(request):
-#    usuario = get_object_or_404(Usuario, id=request.user.id)
-#    return render_to_response('obtener_certificado.html', {'usuario': usuario}, context_instance=RequestContext(request))
-
 @login_required()
 def mis_liquidaciones(request):
     liquidaciones = Liquidacion.objects.filter(Usuario_rut=request.user.first_name)
     return render_to_response('mis_liquidaciones.html', {'liquidaciones': liquidaciones}, context_instance=RequestContext(request))
 
-@login_required()
-def liq_detalle(request):
-    usuario = get_object_or_404(Usuario, id=request.user.id)
-    liquidaciones = Liquidacion.objects.filter(Usuario_rut=usuario.rut)
-    return render_to_response('mis_liquidaciones.html', {'liquidaciones': liquidaciones}, context_instance=RequestContext(request))
+
+@permission_required('portal.puede_enviar', login_url="/ingresar") 
+def mensajes(request):
+    msgs = Mensaje.objects.all()
+    return render_to_response(
+        'mensajes.html',
+        {'msgs': msgs},
+        context_instance=RequestContext(request)
+    )
+
+@permission_required('portal.puede_eliminar', login_url="/ingresar")
+def eliminar(request, id):
+    Mensaje.objects.get(id=id).delete()
+    return HttpResponseRedirect('/home/mensajes')
 
 
-@login_required()
-def obtener_certificado(request):
-    try: 
-        usuario = Usuario.objects.get(rut=request.user.first_name)
-    except ValueError: 
-        raise Http404() 
-    respuesta = HttpResponse(content_type = 'application/pdf')
-    respuesta['Content-Disposition'] = 'filename = "certificado.pdf"'
+@permission_required('portal.puede_enviar', login_url="/ingresar") 
+def nuevo_mensaje(request):
+    if request.method == 'POST':
+        form = MensajeForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            return HttpResponseRedirect('/home/mensajes')
+    else:
+        form = MensajeForm(request.POST, request.FILES)
+    return render_to_response('nuevo_mensaje.html',{'form': form}, context_instance=RequestContext(request))
 
-
-    Q = SimpleDocTemplate(respuesta,rightMargin=72,leftMargin=72,topMargin=72,BottomMargin=18)
-    Story = []
-
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name='Header',alignment=1,spaceBefore=85,fontSize=20,leading=22))
-    styles.add(ParagraphStyle(name='Estilo01',alignment = 2))
-    styles.add(ParagraphStyle(name='Estilo02',alignment = 0,firstLineIndent=100,spaceBefore=50,fontSize=18,leading=20))
-    styles.add(ParagraphStyle(name='Pie',spaceBefore=100,alignment=2))
-
-    ptext = 'Servicios e Ingenieria Ltda.'
-    ptext2 = 'Valdivia, Chile (Agregar fecha)'
-    pa = Paragraph(ptext,styles['Estilo01'])
-    pa2 = Paragraph(ptext2,styles['Estilo01'])
-    #im = Image("media/logo.gif")
-    #im.halign="LEFT"
-
-    #data = [[im,pa],['',pa2]]
-
-    #TTemp = Table(data,colWidths=90)
-
-    #Story.append(TTemp)
-
-    HText = "CERTIFICADO DE ANTIGUEDAD LABORAL"
-
-    Header = Paragraph(HText,styles['Header'])
-
-    Story.append(Header)
-
-    ptext = '<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385,055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
-     Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+', RUT:'+usuario.rut+' , es trabajador de esta empresa, \
-     se desempena como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+'</b> y es de caracter <b>Indefinido</b>, y registra\
-     domicilio segun contrato en <b>'+usuario.direccion+'</b>, de Valdivia'
-
-    TTemp = Paragraph(ptext,styles['Estilo02'])
-
-    Story.append(TTemp)
-
-    ptext = 'Se emite el presente certificado a peticion del interesado para ser presentadoen <b>AFP</b>'
-
-    TTemp = Paragraph(ptext,styles['Estilo02'])
-
-    Story.append(TTemp)
-
-    ptext = "JULIO GUIDILFREDO ZARECHT ORTEGA <br/> Representante Legal"
-
-    TTemp = Paragraph(ptext,styles['Pie'])
-
-    Story.append(TTemp)
-
-    Q.build(Story)
-
-    respuesta.close()
-
-    return respuesta
-
-@login_required()
-def imprimir_liquidacion(request,pk):   
-    try: 
-        liquidacion = Liquidacion.objects.get(id=pk) 
-        usuario = Usuario.objects.get(rut=request.user.first_name)
-    except ValueError: # Si no existe llamamos a "pagina no encontrada". 
-        raise Http404()  
-    response = HttpResponse(content_type='application/pdf') 
-    response['Content-Disposition'] = "attachment; filename="+str(liquidacion.mes)+".pdf"
-    Q = SimpleDocTemplate(response,rightMargin=30,leftMargin=30,topMargin=20,BottomMargin=5)
-    Story = []
-    styles = getSampleStyleSheet()
-    t = Table([
-        ['Empleador','SERVICIOS E INGENIERIA LTDA','','','','',''],
-        ['R.U.T.','77.869.650-9','','','','',''],
-        ['Dirección','AVDA. PICARTE 3644, INTERIOR, VALDIVIA','','','','',''],
-        ['','','','','','',''],
-        ['','','LIQUIDACION DE SUELDO MES '+liquidacion.mes.upper(),'','','',''],
-        ['','','','','','',''],
-        ['NOMBRE',usuario.nombre,'','','','RUT',usuario.rut],
-        ['C.COSTO',usuario.ccosto,'','','','AREA',usuario.zonal],
-        ['CARGO',usuario.cargo,'','','','FECHA ING',usuario.fecha_ingreso],
-        ['AFP',usuario.afp,'','','','SALUD',usuario.salud],
-        ['DIAS TRABAJADOS',liquidacion.dias,'LICENCIA','','AUSENTE','',''],
-        ['','','','','','',''],
-        ['','','','HABERES','','',''],
-        ['','','','','','',''],
-        ['SUELDO DEL MES','','','','','',liquidacion.sueldo],
-        ['GRATIFICACION','','','','','',liquidacion.gratificacion],
-        ['COMISION PRODUCCION','','','','','',liquidacion.bonos_impon],
-        ['HORAS EXTRAS','','','','','',liquidacion.h_extras],
-        ['TOTAL HABERES IMPONIBLES','','','','','',liquidacion.total_impon],
-        ['ASIGNACION VIATICOS','','','','','',liquidacion.colacion],
-        ['MOVILIZACION COMBUSTIBLE','','','','','',liquidacion.movilizacion],
-        ['TOTAL NO IMPONIBLE','','','','','',liquidacion.total_no_impon],
-        ['TOTAL HABERES','','','','','',liquidacion.total_haberes],
-        ['','','','','','',''],
-        ['','','','DESCUENTOS','','',''],
-        ['','','','','','',''],
-        ['AFP','','','','','',liquidacion.afp],
-        ['SALUD','','','','','',liquidacion.salud],
-        ['SEGURO CESANTIA','','','','','',liquidacion.seg_cesantia],
-        ['TOTAL DESCUENTOS LEGALES','','','','','',''],
-        ['ANTICIPOS','','','','','',''],
-        ['TOTAL OTROS DESCUENTOS','','','','','',liquidacion.otros_dsctos],
-        ['TOTAL DESCUENTOS','','','','','',liquidacion.total_dsctos],
-        ['','','','','','',''],
-        ['','','','','','',''],
-        ['LIQUIDO A PAGAR','','','','','',liquidacion.liquido_pago],
-        ['','','','','','',''],
-        ['','','','','','',''],
-        ['-------------','','','','','','--------------'],
-        ['Firma Representante Legal','','','','','Recibí Conforme(Firma)',''],
-        ['JULIO ZARECHT ORTEGA','','','','',usuario.nombre,''],
-        ['R.U.T.:7.385.055-K','','','','','R.U.T.:'+usuario.rut,''],
-    ], colWidths=80, rowHeights=10)
-    Story.append(t)
-    Q.build(Story)
-    response.close()
-    return response
-
-@login_required()
-def imprimir_ultima(request):  
-    try: 
-        usuario = get_object_or_404(Usuario, id=request.user.id)
-        qs = Liquidacion.objects.filter(Usuario_rut=usuario.rut)
-        qs = qs.latest("mes")
-    except ValueError: 
-        raise Http404() 
-    response = HttpResponse(content_type='application/pdf') 
-    response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
-    buffer = BytesIO() 
-    p = canvas.Canvas(buffer) 
-    p.drawString(100, 800, "Rut trabajador")
-    p.drawString(300, 800, str(qs.Usuario_rut))
-    p.drawString(100, 790, "mes")
-    p.drawString(300, 790, str(qs.mes))
-    p.drawString(100, 780, "Sueldo")
-    p.drawString(300, 780, str(qs.sueldo))
-    p.drawString(100, 770, "Gratificacion legal")
-    p.drawString(300, 770, str(qs.gratificacion))
-    p.drawString(100, 760, "AFP")
-    p.drawString(300, 760, str(qs.afp))
-    p.drawString(100, 750, "Anticipo")
-    p.drawString(300, 750, str(qs.anticipo))
-    p.showPage() 
-    p.save() 
-    pdf = buffer.getvalue() 
-    buffer.close() 
-    response.write(pdf) 
-    return response
-
-@login_required()
-def copias_liquidaciones(request):
-    usuario = get_object_or_404(Usuario, id=request.user.id)
-    return render_to_response('copias_liquidaciones.html', {'usuario': usuario}, context_instance=RequestContext(request))
 
 @permission_required('portal.puede_cargar', login_url="/ingresar") 
-def cargar_usuarios(request):	
+def cargar_usuarios(request):   
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -276,7 +134,6 @@ def cargar_liquidaciones(request):
                     if index == 1:
                         s=row[0]
                         mes_data = s[16:]
-
                 else: 
                     liquidaciones = Liquidacion()
                     liquidaciones.Usuario_rut = row[1]
@@ -310,21 +167,146 @@ def cargar_liquidaciones(request):
                     liquidaciones.total_dsctos = row[28]
                     liquidaciones.liquido_pago = row[29]
                     liquidaciones.save()
-            return HttpResponseRedirect('/home')
+            return HttpResponseRedirect('/home/cargar_liquidaciones/carga_correcta')
     else:
         form = UploadFileForm()
     return render_to_response('cargar_liquidaciones.html', {'form': form}, context_instance=RequestContext(request))
 
+def carga_correcta(request):
+    messages.add_message(request, messages.INFO, "Liquidaciones cargadas Correctamente.")
+    return render_to_response('aviso.html', context_instance=RequestContext(request))
 
 @login_required()
-def us(request):
-    with open('us_rut.csv', 'rb') as csvfile:
-        spamreader = csv.reader(csvfile)
-        for row in spamreader:
-            user = Us()
-            user.username = row[0]
-            user.password = row[2]
-            user.rut = row[1]
-            user.save()
-        return HttpResponseRedirect('/home')
+def obtener_certificado(request):
+    try: 
+        usuario = Usuario.objects.get(rut=request.user.first_name)
+    except ValueError: 
+        raise Http404() 
+    respuesta = HttpResponse(content_type = 'application/pdf')
+    respuesta['Content-Disposition'] = 'filename = "certificado.pdf"'
+    Q = SimpleDocTemplate(respuesta,rightMargin=72,leftMargin=72,topMargin=72,BottomMargin=18)
+    Story = []
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Header',alignment=1,spaceBefore=85,fontSize=20,leading=22))
+    styles.add(ParagraphStyle(name='Estilo01',alignment = 2))
+    styles.add(ParagraphStyle(name='Estilo02',alignment = 0,firstLineIndent=100,spaceBefore=50,fontSize=18,leading=20))
+    styles.add(ParagraphStyle(name='Pie',spaceBefore=100,alignment=2))
+    ptext = 'Servicios e Ingenieria Ltda.'
+    ptext2 = 'Valdivia, Chile (Agregar fecha)'
+    pa = Paragraph(ptext,styles['Estilo01'])
+    pa2 = Paragraph(ptext2,styles['Estilo01'])
+    #im = Image("media/logo.gif")
+    #im.halign="LEFT"
+    #data = [[im,pa],['',pa2]]
+    #TTemp = Table(data,colWidths=90)
+    #Story.append(TTemp)
+    HText = "CERTIFICADO DE ANTIGUEDAD LABORAL"
+    Header = Paragraph(HText,styles['Header'])
+    Story.append(Header)
+    ptext = '<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385,055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
+     Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+', RUT:'+usuario.rut+' , es trabajador de esta empresa, \
+     se desempena como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+'</b> y es de caracter <b>Indefinido</b>, y registra\
+     domicilio segun contrato en <b>'+usuario.direccion+'</b>, de Valdivia'
+    TTemp = Paragraph(ptext,styles['Estilo02'])
+    Story.append(TTemp)
+    ptext = 'Se emite el presente certificado a peticion del interesado para ser presentadoen <b>AFP</b>'
+    TTemp = Paragraph(ptext,styles['Estilo02'])
+    Story.append(TTemp)
+    ptext = "JULIO GUIDILFREDO ZARECHT ORTEGA <br/> Representante Legal"
+    TTemp = Paragraph(ptext,styles['Pie'])
+    Story.append(TTemp)
+    Q.build(Story)
+    respuesta.close()
+    return respuesta
+ 
+@login_required()
+def imprimir_liquidacion(request,pk):   
+    try: 
+        liquidacion = Liquidacion.objects.get(id=pk) 
+        usuario = Usuario.objects.get(rut=request.user.first_name)
+    except ValueError: # Si no existe llamamos a "pagina no encontrada". 
+        raise Http404()  
+    response = HttpResponse(content_type='application/pdf') 
+    response['Content-Disposition'] = "attachment; filename="+str(liquidacion.mes)+".pdf"
+    Q = SimpleDocTemplate(response,rightMargin=30,leftMargin=30,topMargin=20,BottomMargin=5)
+    Story = []
+    styles = getSampleStyleSheet()
+    t = Table([
+        ['Empleador','SERVICIOS E INGENIERIA LTDA','','','','',''],
+        ['R.U.T.','77.869.650-9','','','','',''],
+        ['Dirección','AVDA. PICARTE 3644, INTERIOR, VALDIVIA','','','','',''],
+        ['','','','','','',''],
+        ['','','LIQUIDACION DE SUELDO MES '+liquidacion.mes.upper(),'','','',''],
+        ['','','','','','',''],
+        ['NOMBRE',usuario.nombre,'','','','RUT',usuario.rut],
+        ['C.COSTO',usuario.ccosto,'','','','AREA',usuario.zonal],
+        ['CARGO',usuario.cargo,'','','','FECHA ING',usuario.fecha_ingreso],
+        ['AFP',usuario.afp,'','','','SALUD',usuario.salud],
+        ['DIAS TRABAJADOS',liquidacion.dias,'LICENCIA','','AUSENTE','',''],
+        ['','','','','','',''],
+        ['','','','HABERES','','',''],
+        ['','','','','','',''],
+        ['SUELDO DEL MES','','','','','','$'+'{:,}'.format(liquidacion.sueldo)],
+        ['GRATIFICACION','','','','','','$'+'{:,}'.format(liquidacion.gratificacion)],
+        ['COMISION PRODUCCION','','','','','','$'+'{:,}'.format(liquidacion.bonos_impon)],
+        ['HORAS EXTRAS','','','','','','$'+'{:,}'.format(liquidacion.h_extras)],
+        ['TOTAL HABERES IMPONIBLES','','','','','','$'+'{:,}'.format(liquidacion.total_impon)],
+        ['ASIGNACION VIATICOS','','','','','','$'+'{:,}'.format(liquidacion.colacion)],
+        ['MOVILIZACION COMBUSTIBLE','','','','','','$'+'{:,}'.format(liquidacion.movilizacion)],
+        ['TOTAL NO IMPONIBLE','','','','','','$'+'{:,}'.format(liquidacion.total_no_impon)],
+        ['TOTAL HABERES','','','','','','$'+'{:,}'.format(liquidacion.total_haberes)],
+        ['','','','','','',''],
+        ['','','','DESCUENTOS','','',''],
+        ['','','','','','',''],
+        ['AFP','','','','','','$'+'{:,}'.format(liquidacion.afp)],
+        ['SALUD','','','','','','$'+'{:,}'.format(liquidacion.salud)],
+        ['SEGURO CESANTIA','','','','','','$'+'{:,}'.format(liquidacion.seg_cesantia)],
+        ['TOTAL DESCUENTOS LEGALES','','','','','',''],
+        ['ANTICIPOS','','','','','',''],
+        ['TOTAL OTROS DESCUENTOS','','','','','','$'+'{:,}'.format(liquidacion.otros_dsctos)],
+        ['TOTAL DESCUENTOS','','','','','','$'+'{:,}'.format(liquidacion.total_dsctos)],
+        ['','','','','','',''],
+        ['','','','','','',''],
+        ['LIQUIDO A PAGAR','','','','','','$'+'{:,}'.format(liquidacion.liquido_pago)],
+        ['','','','','','',''],
+        ['','','','','','',''],
+        ['-------------','','','','','','--------------'],
+        ['Firma Representante Legal','','','','','Recibí Conforme(Firma)',''],
+        ['JULIO ZARECHT ORTEGA','','','','',usuario.nombre,''],
+        ['R.U.T.:7.385.055-K','','','','','R.U.T.:'+usuario.rut,''],
+    ], colWidths=80, rowHeights=10)
+    Story.append(t)
+    Q.build(Story)
+    response.close()
+    return response
 
+
+
+@permission_required('portal.puede_crear', login_url="/ingresar")
+def us(request):
+    #Esta es una funcion auxiliar, para crear los usuarios iniciales del sistema
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            reader = csv.reader(request.FILES['docfile'])
+            index = 0
+            for index,row in enumerate(reader):
+                if index<7:
+                    print 'cabecera'
+                else: 
+                    usuarios = Us()
+                    nom = row[1]
+                    i1=nom.index(' ')
+                    i2=nom.index(' ',i1+1)
+                    n1=nom[i2+1:i2+2]
+                    a1=nom[0:i1]
+                    us=n1+a1
+                    us= us.lower()
+                    usuarios.username = us
+                    usuarios.password = '202cb962ac59075b964b07152d234b70'
+                    usuarios.rut = row[4]
+                    usuarios.save()
+            return HttpResponseRedirect('/home')
+    else:
+        form = UploadFileForm()
+    return render_to_response('cargar_usuarios.html', {'form': form}, context_instance=RequestContext(request))

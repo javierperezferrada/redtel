@@ -3,6 +3,13 @@
 {% block title %}Cargar Liquidaciones{% endblock %}
  
 {% block seccion %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 <h1>Cargar Liquidaciones</h1>
 <div class='container'>	
 	<p>Interfaz de carga de Liquidaciones.</p>
@@ -17,4 +24,6 @@
         <input type="submit" value="Cargar"> 
     </form> 
 </div>
+
 {% endblock %}
+

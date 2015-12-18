@@ -1,0 +1,33 @@
+{% extends 'home.html' %}
+{% load static %}
+{% block title %}Mensajes{% endblock %}
+  
+
+{% block seccion %}
+
+<a href="nuevo_mensaje">Nuevo</a>
+  
+{% if msgs %}
+<div class="example" data-text="example">
+    <table id="example_table" class="dataTable striped border bordered" data-role="datatable" data-searching="true">
+        <thead>
+            <tr>
+                    <th>Mensajes</th>
+             
+                    <th> </th>          
+            </tr>
+        </thead>
+        <tbody>
+        {% for msg in msgs %}  
+            <tr>
+                    <td>{{ msg.msg }}</td>
+                    
+              <td><a href='eliminar/{{ msg.id }}'>Eliminar</a></td>
+            </tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
+
+{% endblock %}
