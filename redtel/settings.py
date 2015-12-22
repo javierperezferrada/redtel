@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'gyp',
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'root',
-        'PASSWORD': 'utn45t',
+        'PASSWORD': '123456',
 
     }
 }
