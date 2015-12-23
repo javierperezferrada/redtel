@@ -189,7 +189,7 @@ def obtener_certificado(request):
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name='Header',alignment=1,spaceBefore=15,fontSize=20,leading=22))
     styles.add(ParagraphStyle(name='Estilo01',alignment = 2))
-    styles.add(ParagraphStyle(name='Estilo02',alignment = 0,firstLineIndent=100,spaceBefore=30,fontSize=18,leading=20))
+    styles.add(ParagraphStyle(name='Estilo02',alignment = 4,firstLineIndent=100,spaceBefore=30,fontSize=18,leading=20))
     styles.add(ParagraphStyle(name='Pie',spaceBefore=120,alignment=2))
     ptext = 'Servicios e Ingenieria Ltda.'
     ptext2 = 'Valdivia, Chile (Agregar fecha)'
