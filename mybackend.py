@@ -24,12 +24,12 @@ class RedtelBackend(object):
                 # de settings.py lo hara. 
                 rut = usuario.rut
                 n=len(rut)
-                if n==12 :
+                if n==13:
+                    rut = rut.upper()
+                if n==12:
                     rut = '0'+rut.upper()
-                else:
-                    rut = '00'+rut.upper()
-                user = User(username=username, password=usuario.password,first_name=rut)
-                user.save() 
+                if n==11:
+                    rut = '00'+rut.upper() 
             return user 
         return None 
  
