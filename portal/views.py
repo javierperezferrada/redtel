@@ -203,16 +203,16 @@ def obtener_certificado(request):
     HText = "CERTIFICADO DE ANTIGUEDAD LABORAL"
     Header = Paragraph(HText,styles['Header'])
     Story.append(Header)
-    ptext = u'<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385.055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
-     Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+u', RUT:'+usuario.rut+' , es trabajador de esta empresa, \
-     se desempena como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+u'</b> y es de caracter <b>Indefinido</b>, y registra\
-     domicilio segun contrato en <b>'+usuario.direccion+u'</b>, de Valdivia'
+    ptext = u'<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, Rut 7.385.055-K representante legal de <b>Servicios e Ingeniería Limitada</b>,\
+     Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+u', RUT:'+usuario.rut+u', es trabajador de esta empresa, \
+     se desempeña como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+u'</b> y es de carácter <b>Indefinido</b>, y registra\
+     domicilio según contrato en <b>'+usuario.direccion+u'</b>, de Valdivia.'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
-    ptext = 'Se emite el presente certificado a peticion del interesado para ser presentadoen <b>AFP</b>'
+    ptext = 'Se emite el presente certificado a peticion del interesado para ser presentado en <b>Caja de Compensacion</b>'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
-    im2 = Image("/var/www/redtel/static/firma.png")
+    im2 = Image("static/firma.png")
     ptext = "JULIO GUIDILFREDO ZARECHT ORTEGA <br/> Representante Legal"
     TTemp = Paragraph(ptext,styles['Pie'])
     data = [["",im2],["",TTemp]]
