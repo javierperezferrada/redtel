@@ -236,7 +236,7 @@ def imprimir_liquidacion(request,pk):
     response['Content-Disposition'] = "attachment; filename="+str(liquidacion.mes)+".pdf"
     Q = SimpleDocTemplate(response,rightMargin=30,leftMargin=30,topMargin=20,BottomMargin=5)
 
-    im = Image("/var/www/redtel/static/Redtel_logo.jpg")
+    im = Image("/var/www/redtel/static/Redtel_logo.gif")
     Story = []
     styles = getSampleStyleSheet()
     t = Table([
