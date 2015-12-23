@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
  
 {% block body %}
  
     <header>
         <div class="app-bar">
+            <a class="app-bar-element" href="/home"><img src="{% static 'img/logoRedtel1.png' %}" height="90" width="100"></a>
+            <span class="app-bar-divider"></span>
             <a class="app-bar-element" href="/home">Inicio</a>
             <span class="app-bar-divider"></span>
             <a class="app-bar-element" href="/home/mis_datos">Mis datos</a>
@@ -32,14 +35,27 @@
 
 
     {% if mensajes %} 
-
-    {% for message in mensajes %} 
-    <p>{{ message.msg }}</p> 
+    <div class="grid">
+    <div class="cell-auto-size">
+    {% for message in mensajes %}
+    
+    <div class="panel warning">
+    <div class="heading">
+        <span class="title">Mensaje </span>
+    </div>
+    <div class="content">
+        <p>{{ message.msg }}</p>
+    </div>
+    </div>
+    </div>
+    </div> 
+    
     {% endfor %} 
 
-{% endif %} 
+    {% endif %}
 
     {% block seccion %}
+
     {% endblock %}
   
 {% endblock %}
