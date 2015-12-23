@@ -10,7 +10,10 @@ class RedtelBackend(object):
     def authenticate(self, username=None, password=None): 
         'metodo que realizara la autentificacion contra la tabla usuarios' 
         'de redtel.'
-        usuario = Us.objects.get(username=username)
+        try: 
+            usuario = Us.objects.get(username=username)
+        except Us.DoesNotExist:
+            return None
         encript = md5.new(password).hexdigest()
         if encript == usuario.password: 
             try: 
