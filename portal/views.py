@@ -29,6 +29,7 @@ from django.contrib import messages
 import csv
 from .forms import UploadFileForm
 from .forms import MensajeForm
+import datetime
 
 
 def index(request):
@@ -178,6 +179,7 @@ def carga_correcta(request):
 
 @login_required()
 def obtener_certificado(request):
+    now = datetime.datetime.now()
     try: 
         usuario = Usuario.objects.get(rut=request.user.first_name)
     except ValueError: 
@@ -192,7 +194,7 @@ def obtener_certificado(request):
     styles.add(ParagraphStyle(name='Estilo02',alignment = 4,firstLineIndent=100,spaceBefore=30,fontSize=18,leading=20))
     styles.add(ParagraphStyle(name='Pie',spaceBefore=120,alignment=2))
     ptext = 'Servicios e Ingenieria Ltda.'
-    ptext2 = 'Valdivia, Chile (Agregar fecha)'
+    ptext2 = 'Valdivia, Chile,  '+str(now.day)+'/'+str(now.month)+'/'+str(now.year)+''
     pa = Paragraph(ptext,styles['Estilo01'])
     pa2 = Paragraph(ptext2,styles['Estilo01'])
     im = Image("/var/www/redtel/static/Redtel_logo.gif")
