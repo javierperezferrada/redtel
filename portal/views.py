@@ -212,7 +212,7 @@ def obtener_certificado(request):
     ptext = 'Se emite el presente certificado a peticion del interesado para ser presentado en <b>Caja de Compensacion</b>'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
-    im2 = Image("static/firma.png")
+    im2 = Image("/var/www/redtel/static/firma.png")
     ptext = "JULIO GUIDILFREDO ZARECHT ORTEGA <br/> Representante Legal"
     TTemp = Paragraph(ptext,styles['Pie'])
     data = [["",im2],["",TTemp]]
