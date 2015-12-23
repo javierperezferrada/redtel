@@ -203,10 +203,10 @@ def obtener_certificado(request):
     HText = "CERTIFICADO DE ANTIGUEDAD LABORAL"
     Header = Paragraph(HText,styles['Header'])
     Story.append(Header)
-    ptext = '<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385.055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
-     Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+', RUT:'+usuario.rut+' , es trabajador de esta empresa, \
-     se desempena como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+'</b> y es de caracter <b>Indefinido</b>, y registra\
-     domicilio segun contrato en <b>'+usuario.direccion+'</b>, de Valdivia'
+    ptext = u'<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385.055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
+     Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+u', RUT:'+usuario.rut+' , es trabajador de esta empresa, \
+     se desempena como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+u'</b> y es de caracter <b>Indefinido</b>, y registra\
+     domicilio segun contrato en <b>'+usuario.direccion+u'</b>, de Valdivia'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
     ptext = 'Se emite el presente certificado a peticion del interesado para ser presentadoen <b>AFP</b>'
@@ -233,13 +233,15 @@ def imprimir_liquidacion(request,pk):
     response = HttpResponse(content_type='application/pdf') 
     response['Content-Disposition'] = "attachment; filename="+str(liquidacion.mes)+".pdf"
     Q = SimpleDocTemplate(response,rightMargin=30,leftMargin=30,topMargin=20,BottomMargin=5)
+
+    im = Image("/var/www/redtel/static/Redtel_logo.jpg")
     Story = []
     styles = getSampleStyleSheet()
     t = Table([
         ['Empleador','SERVICIOS E INGENIERIA LTDA','','','','',''],
         ['R.U.T.','77.869.650-9','','','','',''],
         ['Dirección','AVDA. PICARTE 3644, INTERIOR, VALDIVIA','','','','',''],
-        ['','','','','','',''],
+        ['','','','',im,'',''],
         ['','','LIQUIDACION DE SUELDO MES '+liquidacion.mes.upper(),'','','',''],
         ['','','','','','',''],
         ['NOMBRE',usuario.nombre,'','','','RUT',usuario.rut],
@@ -283,6 +285,7 @@ def imprimir_liquidacion(request,pk):
     Q.build(Story)
     response.close()
     return response
+
 
 
 
