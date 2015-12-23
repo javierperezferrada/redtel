@@ -209,7 +209,7 @@ def obtener_certificado(request):
      domicilio según contrato en <b>'+usuario.direccion+u'</b>, de Valdivia.'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
-    ptext = 'Se emite el presente certificado a peticion del interesado para ser presentado en <b>Caja de Compensacion</b>'
+    ptext = 'Se emite el presente certificado a petición del interesado para ser presentado en <b>Caja de Compensación</b>'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
     im2 = Image("/var/www/redtel/static/firma.png")
