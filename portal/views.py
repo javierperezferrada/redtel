@@ -187,23 +187,23 @@ def obtener_certificado(request):
     Q = SimpleDocTemplate(respuesta,rightMargin=72,leftMargin=72,topMargin=72,BottomMargin=18)
     Story = []
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name='Header',alignment=1,spaceBefore=85,fontSize=20,leading=22))
+    styles.add(ParagraphStyle(name='Header',alignment=1,spaceBefore=15,fontSize=20,leading=22))
     styles.add(ParagraphStyle(name='Estilo01',alignment = 2))
-    styles.add(ParagraphStyle(name='Estilo02',alignment = 0,firstLineIndent=100,spaceBefore=50,fontSize=18,leading=20))
-    styles.add(ParagraphStyle(name='Pie',spaceBefore=100,alignment=2))
+    styles.add(ParagraphStyle(name='Estilo02',alignment = 0,firstLineIndent=100,spaceBefore=30,fontSize=18,leading=20))
+    styles.add(ParagraphStyle(name='Pie',spaceBefore=120,alignment=2))
     ptext = 'Servicios e Ingenieria Ltda.'
     ptext2 = 'Valdivia, Chile (Agregar fecha)'
     pa = Paragraph(ptext,styles['Estilo01'])
     pa2 = Paragraph(ptext2,styles['Estilo01'])
-    #im = Image("media/logo.gif")
-    #im.halign="LEFT"
-    #data = [[im,pa],['',pa2]]
-    #TTemp = Table(data,colWidths=90)
-    #Story.append(TTemp)
+    im = Image("static/Redtel_logo.gif")
+    im.halign="LEFT"
+    data = [[im,pa],['',pa2]]
+    TTemp = Table(data,colWidths=200)
+    Story.append(TTemp)
     HText = "CERTIFICADO DE ANTIGUEDAD LABORAL"
     Header = Paragraph(HText,styles['Header'])
     Story.append(Header)
-    ptext = '<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385,055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
+    ptext = '<b>JULIO GUIDILFREDO ZARECHT ORTEGA</b>, rut 7.385.055-K representante legal de <b>Servicios e Ingenieria Limitada</b>,\
      Rut: 77.869.650-9 por medio de la presente, certifica que don:'+usuario.nombre+', RUT:'+usuario.rut+' , es trabajador de esta empresa, \
      se desempena como Encargado RRHH, con contrato vigente desde el <b>'+usuario.fecha_ingreso+'</b> y es de caracter <b>Indefinido</b>, y registra\
      domicilio segun contrato en <b>'+usuario.direccion+'</b>, de Valdivia'
@@ -212,8 +212,12 @@ def obtener_certificado(request):
     ptext = 'Se emite el presente certificado a peticion del interesado para ser presentadoen <b>AFP</b>'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
+    im2 = Image("static/firma.png")
     ptext = "JULIO GUIDILFREDO ZARECHT ORTEGA <br/> Representante Legal"
     TTemp = Paragraph(ptext,styles['Pie'])
+    data = [["",im2],["",TTemp]]
+    TTemp = Table(data,colWidths=200)
+    TTemp.setStyle(TableStyle([('ALIGN',(0,0),(1,1),'RIGHT'),]))
     Story.append(TTemp)
     Q.build(Story)
     respuesta.close()
