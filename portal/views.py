@@ -195,7 +195,7 @@ def obtener_certificado(request):
     ptext2 = 'Valdivia, Chile (Agregar fecha)'
     pa = Paragraph(ptext,styles['Estilo01'])
     pa2 = Paragraph(ptext2,styles['Estilo01'])
-    im = Image("/static/Redtel_logo.gif")
+    im = Image("static/Redtel_logo.gif")
     im.halign="LEFT"
     data = [[im,pa],['',pa2]]
     TTemp = Table(data,colWidths=200)
@@ -212,7 +212,7 @@ def obtener_certificado(request):
     ptext = 'Se emite el presente certificado a peticion del interesado para ser presentadoen <b>AFP</b>'
     TTemp = Paragraph(ptext,styles['Estilo02'])
     Story.append(TTemp)
-    im2 = Image("/static/firma.png")
+    im2 = Image("static/firma.png")
     ptext = "JULIO GUIDILFREDO ZARECHT ORTEGA <br/> Representante Legal"
     TTemp = Paragraph(ptext,styles['Pie'])
     data = [["",im2],["",TTemp]]
