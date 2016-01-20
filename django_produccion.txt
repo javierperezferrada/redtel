@@ -1,0 +1,18 @@
+/etc/apache2/sites-availables/000-default.conf
+	<VirtualHost *:80>
+		ServerName redtel.cl
+		ServerAlias www.redtel.cl
+		ServerAdmin correo@gmail.com
+
+		Alias /static /var/www/redtel/static
+		DocumentRoot /var/www/redtel
+		WSGIScriptAlias / /var/www/redtel/redtel/wsgi.py
+
+		ErrorLog /var/www/logs/error.log
+		CustomLog /var/www/logs/custom.log combined
+
+	</VirtualHost>
+
+
+/etc/apache2/apache2.conf
+	WSGIPythonPath /var/www/redtel
